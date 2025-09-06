@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>银龄光影 - 东北农大实践队</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 基础变量定义 - 统一风格 */
+        :root {
+            --primary: #2E7D32; /* 农大绿-主色 */
+            --primary-light: #4CAF50; /* 主色浅调 */
+            --primary-dark: #1B5E20; /* 主色深调 */
+            --secondary: #FF9800; /* 辅助色-暖橙 */
+            --accent: #03A9F4; /* 强调色-浅蓝 */
+            --white: #FFFFFF;
+            --gray-light: #F5F5F5;
+            --gray: #E0E0E0;
+            --gray-dark: #9E9E9E;
+            --text: #212121;
+            --text-light: #757575;
+            --radius: 16px; /* 安卓APP圆角 */
+            --shadow: 0 4px 12px rgba(0,0,0,0.08); /* 柔和阴影 */
+            --shadow-strong: 0 8px 24px rgba(0,0,0,0.12); /* 强化阴影 */
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 统一过渡 */
+        }
+
+        /* 重置样式 - 清除默认边距 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'Microsoft YaHei', sans-serif; /* 安卓默认字体风格 */
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            padding-top: 44px; /* 状态栏+标题栏高度 */
+            padding-bottom: 68px; /* 底部导航高度 */
+        }
+
+        /* 1. 安卓状态栏 - 顶部固定 */
+        .android-status-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 24px;
+            background-color: var(--white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 12px;
+            color: var(--text);
+            z-index: 100;
+            border-bottom: 1px solid var(--gray);
+        }
+
+        .status-bar-icons {
+            display: flex;
+            gap: 4px;
+        }
+
+        /* 2. 安卓标题栏 - 固定在状态栏下方 */
+        .android-title-bar {
+            position: fixed;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .title-bar-back {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .title-bar-back:hover {
+            background-color: var(--gray-light);
+        }
+
+        .title-bar-back i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .title-bar-title {
+            flex: 1;
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text);
+            text-align: center;
+        }
+
+        .title-bar-extra {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .title-bar-extra:hover {
+            background-color: var(--gray-light);
+        }
+
+        .title-bar-extra i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        /* 3. 主体内容区 - 适配上下固定栏 */
+        .app-content {
+            width: 100%;
+            max-width: 480px; /* 模拟安卓手机宽度 */
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* 页面容器 - 初始仅首页显示 */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 4. 安卓卡片组件 - 核心UI元素 */
+        .android-card {
+            background-color: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: var(--transition);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .android-card:hover {
+            box-shadow: var(--shadow-strong);
+            transform: translateY(-2px);
+        }
+
+        .android-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .android-card:hover::before {
+            height: 100%;
+        }
+
+        /* 5. 按钮样式 - 安卓风格 */
+        .android-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 0;
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(46, 125, 50, 0.2);
+        }
+
+        .android-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120%;
+            padding-bottom: 120%;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.6s ease;
+        }
+
+        .android-btn:active::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .android-btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(46, 125, 50, 0.3);
+        }
+
+        .android-btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            box-shadow: none;
+        }
+
+        .android-btn-outline:hover {
+            background-color: rgba(46, 125, 50, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .android-btn-secondary {
+            background-color: var(--secondary);
+            box-shadow: 0 4px 6px rgba(255, 152, 0, 0.2);
+        }
+
+        .android-btn-secondary:hover {
+            background-color: #F57C00;
+            box-shadow: 0 6px 12px rgba(255, 152, 0, 0.3);
+        }
+
+        /* 6. 底部导航栏 - 四个按钮并优化对齐 */
+        .android-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 68px;
+            background-color: var(--white);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            max-width: 480px;
+            margin: 0 auto;
+            left: 50%;
+            transform: translateX(-50%);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 25%; /* 四个按钮平均分配宽度 */
+            height: 100%;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+        }
+
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+            transition: var(--transition);
+        }
+
+        .nav-item.active i {
+            transform: translateY(-4px);
+        }
+
+        .nav-item span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(46, 125, 50, 0.05);
+        }
+
+        /* 7. 首页样式 */
+        .home-banner {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: var(--radius);
+            padding: 24px;
+            color: var(--white);
+            margin-bottom: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .home-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/b0681433a82b4324b7467d6782f18f0e.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=6MPwKtTgHkxLDhQzt3r1Snje13c%3D');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            mix-blend-mode: overlay;
+        }
+
+        .home-banner h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .home-banner p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .home-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            width: 30%;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: var(--shadow-strong);
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 4px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .stat-number::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .stat-item:hover .stat-number::after {
+            width: 100%;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* 8. 项目页面样式 - 整合团队与场景内容 */
+        .project-tabs {
+            display: flex;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+        }
+
+        .project-tab {
+            flex: 1;
+            padding: 12px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .project-tab.active {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .project-content {
+            display: none;
+        }
+
+        .project-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* 团队矩阵样式 */
+        .team-member {
+            cursor: pointer;
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .member-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 16px;
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
+            transition: var(--transition);
+        }
+
+        .team-member:hover .member-avatar {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .member-info h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .member-info h3::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+
+        .team-member:hover .member-info h3::after {
+            width: 100%;
+        }
+
+        .member-role {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        .member-desc {
+            font-size: 14px;
+            color: var(--text-light);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 72px;
+            position: relative;
+        }
+
+        .member-desc::before {
+            content: '';
+            position: absolute;
+            left: 36px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: var(--gray);
+        }
+
+        .member-desc.active {
+            max-height: 200px;
+            margin-top: 12px;
+        }
+
+        /* 9. 实践场景样式 */
+        .scenario-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: thin;
+        }
+
+        .scenario-tabs::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .scenario-tabs::-webkit-scrollbar-thumb {
+            background-color: var(--primary-light);
+            border-radius: 2px;
+        }
+
+        .scenario-tab {
+            padding: 8px 16px;
+            background-color: var(--white);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .scenario-tab.active {
+            background-color: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+        }
+
+        .scenario-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary);
+            border-radius: 50%;
+        }
+
+        .scenario-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .scenario-content.active {
+            display: block;
+        }
+
+        .scenario-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .scenario-image {
+            width: 100%;
+            height: 180px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .scenario-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .scenario-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .scenario-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+        }
+
+        /* 10. 活动记录样式 */
+        .activity-header {
+            margin-bottom: 12px;
+        }
+
+        .activity-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--primary-dark);
+            position: relative;
+            padding-left: 12px;
+        }
+
+        .activity-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 16px;
+            background-color: var(--primary);
+            border-radius: 2px;
+        }
+
+        .activity-meta {
+            font-size: 12px;
+            color: var(--text-light);
+            display: flex;
+            gap: 16px;
+        }
+
+        .activity-gallery {
+            display: flex;
+            gap: 8px;
+            margin: 12px 0;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scrollbar-width: thin;
+        }
+
+        .activity-gallery::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .activity-gallery::-webkit-scrollbar-thumb {
+            background-color: var(--primary-light);
+            border-radius: 2px;
+        }
+
+        .gallery-item {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-item::after {
+            content: '+';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+
+        /* 11. 联系我们样式 */
+        .contact-card {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: var(--transition);
+            padding: 8px 0;
+        }
+
+        .contact-card:hover .contact-item {
+            transform: translateX(5px);
+        }
+
+        .contact-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            flex-shrink: 0;
+            box-shadow: 0 4px 8px rgba(46, 125, 50, 0.2);
+            transition: var(--transition);
+        }
+
+        .contact-item:hover .contact-icon {
+            transform: rotate(10deg);
+        }
+
+        .contact-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .contact-info p {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+
+        /* 12. 图片查看器 */
+        .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .viewer-content {
+            max-width: 100%;
+            max-height: 80vh;
+            position: relative;
+        }
+
+        .viewer-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+
+        .viewer-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.2);
+            transition: var(--transition);
+        }
+
+        .viewer-close:hover {
+            background-color: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        /* 响应式适配 - 仅优化手机端 */
+        @media (max-width: 480px) {
+            .app-content {
+                padding: 12px;
+            }
+
+            .android-card {
+                padding: 16px;
+            }
+
+            .home-banner h1 {
+                font-size: 22px;
+            }
+
+            .gallery-item {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 安卓状态栏 -->
+    <div class="android-status-bar">
+        <div class="status-bar-time">14:30</div>
+        <div class="status-bar-icons">
+            <i class="fa fa-signal"></i>
+            <i class="fa fa-wifi"></i>
+            <i class="fa fa-battery-three-quarters"></i>
+        </div>
+    </div>
+
+    <!-- 安卓标题栏 -->
+    <div class="android-title-bar">
+        <div class="title-bar-back" id="backBtn">
+            <i class="fa fa-arrow-left"></i>
+        </div>
+        <div class="title-bar-title" id="pageTitle">银龄光影实践队</div>
+        <div class="title-bar-extra">
+            <i class="fa fa-share-alt"></i>
+        </div>
+    </div>
+
+    <!-- 主体内容区 -->
+    <div class="app-content">
+        <!-- 首页 -->
+        <div id="homePage" class="page active">
+            <div class="home-banner">
+                <h1>东北农业大学<br>“银龄光影”三下乡实践队</h1>
+                <p>以光影为桥，赋能银龄生活</p>
+                <button class="android-btn" id="homeStartBtn">查看实践详情</button>
+            </div>
+
+            <div class="android-card">
+                <h2 style="font-size: 18px; margin-bottom: 16px; color: var(--text);">实践核心数据</h2>
+                <div class="home-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">300+</div>
+                        <div class="stat-label">服务老人</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">实践区域</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">300+</div>
+                        <div class="stat-label">调研问卷</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="android-card">
+                <h2 style="font-size: 18px; margin-bottom: 12px; color: var(--text);">实践理念</h2>
+                <p style="font-size: 14px; color: var(--text-light); margin-bottom: 16px;">
+                    针对农村养老“情感孤岛化”问题，依托影视艺术疗愈与智能影像技术，构建“地域文化+影像疗愈”养老服务模式，助力老年人重拾记忆、丰富精神生活。
+                </p>
+                <button class="android-btn android-btn-outline" id="homeProjectBtn">了解项目详情</button>
+            </div>
+        </div>
+
+        <!-- 项目页面（整合团队与场景内容） -->
+        <div id="projectPage" class="page">
+            <div class="project-tabs">
+                <div class="project-tab active" data-project="team">团队矩阵</div>
+                <div class="project-tab" data-project="scenario">实践场景</div>
+            </div>
+
+            <!-- 团队内容 -->
+            <div class="project-content active" id="projectTeam">
+                <div class="android-card">
+                    <h2 style="font-size: 18px; margin-bottom: 16px; color: var(--text);">核心团队成员</h2>
+                </div>
+
+                <!-- 成员1 -->
+                <div class="android-card team-member" data-member="1">
+                    <div class="member-header">
+                        <div class="member-avatar">詹</div>
+                        <div class="member-info">
+                            <h3>詹佰瑞</h3>
+                            <div class="member-role">项目负责人 | 跨区域统筹者</div>
+                        </div>
+                    </div>
+                    <div class="member-desc" id="member1Desc">
+                        带队把控黑龙江、山东、安徽三地项目进度，在宾县挖掘北大荒文化元素，在安徽引导老人拍摄徽派建筑，推动“地域文化+影像疗愈”模式落地，统筹团队整体运营与资源协调。
+                    </div>
+                </div>
+
+                <!-- 成员2 -->
+                <div class="android-card team-member" data-member="2">
+                    <div class="member-header">
+                        <div class="member-avatar">李</div>
+                        <div class="member-info">
+                            <h3>李月翔</h3>
+                            <div class="member-role">安全员 | 山东区域带队人</div>
+                        </div>
+                    </div>
+                    <div class="member-desc" id="member2Desc">
+                        统筹全体成员安全保障，在山东实践中设计艺术小游戏帮助老人释放情绪，同步参与拍摄与调研数据收集，确保活动安全有序推进，保障团队实践顺利开展。
+                    </div>
+                </div>
+
+                <!-- 成员3 -->
+                <div class="android-card team-member" data-member="3">
+                    <div class="member-header">
+                        <div class="member-avatar">尹</div>
+                        <div class="member-info">
+                            <h3>尹嘉欣</h3>
+                            <div class="member-role">技术骨干 | 智能系统开发者</div>
+                        </div>
+                    </div>
+                    <div class="member-desc" id="member3Desc">
+                        负责SPSS数据分析和“银龄光影艺术疗愈网站”制作，优化适老化界面，实现语音注释等功能，降低老人使用门槛，为技术赋能养老提供核心支撑。
+                    </div>
+                </div>
+
+                <!-- 成员4 -->
+                <div class="android-card team-member" data-member="4">
+                    <div class="member-header">
+                        <div class="member-avatar">董</div>
+                        <div class="member-info">
+                            <h3>董俊彤</h3>
+                            <div class="member-role">黑龙江实践组核心成员 | 问卷调研主导者</div>
+                        </div>
+                    </div>
+                    <div class="member-desc" id="member4Desc">
+                        在宾县书悦养老院耐心引导老人填写艺术心理疗愈问卷，协助开展“北大荒记忆”摄影课程教学，收集整理调研数据，为项目效果评估提供基础数据支撑。
+                    </div>
+                </div>
+
+                <!-- 更多成员按钮 -->
+                <div class="android-card">
+                    <button class="android-btn android-btn-outline" id="moreMemberBtn">查看更多成员</button>
+                </div>
+            </div>
+
+            <!-- 场景内容 -->
+            <div class="project-content" id="projectScenario">
+                <div class="scenario-tabs">
+                    <div class="scenario-tab active" data-scenario="heilongjiang">黑龙江宾县</div>
+                    <div class="scenario-tab" data-scenario="shandong">山东临沂</div>
+                    <div class="scenario-tab" data-scenario="anhui">安徽西林</div>
+                </div>
+
+                <!-- 黑龙江场景 -->
+                <div class="scenario-content active" id="scenarioHeilongjiang">
+                    <div class="android-card">
+                        <div class="scenario-image">
+                            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/8be8ac6f345f47c3941500e2f6932460.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=o5sw3LrAwz9Jr1A1b5Qu%2FMhi6pA%3D" alt="黑龙江宾县书悦养老院环境">
+                        </div>
+                        <h2 class="scenario-title" style="font-size: 18px; margin-bottom: 12px; color: var(--primary);">宾县书悦养老院</h2>
+                        <p style="font-size: 14px; color: var(--text); margin-bottom: 16px;">
+                            作为“北大荒文化记忆载体”，院内老人多有荒原开垦经历，老物件承载着青春故事，是空巢老人比例较高的实践站点。
+                        </p>
+
+                        <div class="scenario-stats">
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">82%</div>
+                                <div class="stat-label">空巢老人比例</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">73%</div>
+                                <div class="stat-label">存在孤独感</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">12%</div>
+                                <div class="stat-label">智能设备使用率</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">100+</div>
+                                <div class="stat-label">老物件拍摄量</div>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 14px; color: var(--text-light); margin-top: 16px;">
+                            项目通过影像技术帮助老人记录北大荒开垦记忆，开展“北大荒记忆影像营”，用老农具、农田风貌等符号唤醒集体记忆，缓解孤独感。
+                        </p>
+                    </div>
+
+                    <button class="android-btn" id="heilongjiangActivityBtn">查看当地活动</button>
+                </div>
+
+                <!-- 山东场景 -->
+                <div class="scenario-content" id="scenarioShandong">
+                    <div class="android-card">
+                        <div class="scenario-image">
+                            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/a8d6298d70f6490e9fe2086573f3aaba.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=nJnXZepAax8YyxmRiWkeBSPlXAQ%3D" alt="山东临沂汪沟镇养老院环境">
+                        </div>
+                        <h2 class="scenario-title" style="font-size: 18px; margin-bottom: 12px; color: var(--primary);">临沂汪沟镇养老院</h2>
+                        <p style="font-size: 14px; color: var(--text); margin-bottom: 16px;">
+                            地处沂蒙革命老区，老人多有务农或渔业劳作经历，对吕剧有深厚情感，善于感受生活但缺乏影像表达能力。
+                        </p>
+
+                        <div class="scenario-stats">
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">85%</div>
+                                <div class="stat-label">务农/渔业经历</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">60%</div>
+                                <div class="stat-label">对吕剧有情感</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">103</div>
+                                <div class="stat-label">有效问卷</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">85%</div>
+                                <div class="stat-label">认可影像价值</div>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 14px; color: var(--text-light); margin-top: 16px;">
+                            以“生活化艺术疗愈”为核心，设计艺术小游戏，教老人用手机拍摄街巷、老院等熟悉场景，推动老人通过影像加强与子女互动。
+                        </p>
+                    </div>
+
+                    <button class="android-btn" id="shandongActivityBtn">查看当地活动</button>
+                </div>
+
+                <!-- 安徽场景 -->
+                <div class="scenario-content" id="scenarioAnhui">
+                    <div class="android-card">
+                        <div class="scenario-image">
+                            <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/c9c0c40e175549d89c12c5f51217b3ec.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=uB4d5d1Vqp0PuufUQXRlkhLCrh4%3D" alt="安徽西林敬老院环境">
+                        </div>
+                        <h2 class="scenario-title" style="font-size: 18px; margin-bottom: 12px; color: var(--primary);">西林敬老院</h2>
+                        <p style="font-size: 14px; color: var(--text); margin-bottom: 16px;">
+                            周边环绕徽派建筑，老人多居住在传统村落，对马头墙、雕花窗等地域元素有深厚情感，摄影需求强烈。
+                        </p>
+
+                        <div class="scenario-stats">
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">60%</div>
+                                <div class="stat-label">住传统村落</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">75%</div>
+                                <div class="stat-label">爱徽派建筑</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">50+</div>
+                                <div class="stat-label">建筑摄影作品</div>
+                            </div>
+                            <div class="android-card" style="margin-bottom: 0; padding: 12px;">
+                                <div class="stat-value">90%</div>
+                                <div class="stat-label">强化文化认同</div>
+                            </div>
+                        </div>
+
+                        <p style="font-size: 14px; color: var(--text-light); margin-top: 16px;">
+                            开展“徽韵”主题教学，结合戏曲赏析，引导老人记录徽派建筑元素，在拍摄中交流记忆，强化本土文化认同。
+                        </p>
+                    </div>
+
+                    <button class="android-btn" id="anhuiActivityBtn">查看当地活动</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 活动记录页 -->
+        <div id="activityPage" class="page">
+            <!-- 黑龙江活动 -->
+            <div class="android-card">
+                <div class="activity-header">
+                    <div class="activity-title">黑龙江“北大荒记忆影像营”</div>
+                    <div class="activity-meta">
+                        <span><i class="fa fa-calendar"></i> 七月中旬</span>
+                        <span><i class="fa fa-map-marker"></i> 宾县书悦养老院</span>
+                    </div>
+                </div>
+                
+                <div class="activity-gallery">
+                    <div class="gallery-item" data-img="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/553f551592f6455ba764336106ec3772.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=Ro0%2Fm4BQTw%2FS9gojYGYD6Cdez2g%3D">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/553f551592f6455ba764336106ec3772.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=Ro0%2Fm4BQTw%2FS9gojYGYD6Cdez2g%3D" alt="黑龙江活动现场照片1">
+                    </div>
+                    <div class="gallery-item" data-img="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/63ab5ed0e3ac44bcb7da10e3b961315c.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=EmFFMX58nWGE2dNKoXQYtmx%2Fma4%3D">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/63ab5ed0e3ac44bcb7da10e3b961315c.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=EmFFMX58nWGE2dNKoXQYtmx%2Fma4%3D" alt="黑龙江活动现场照片2">
+                    </div>
+                </div>
+                
+                <p style="font-size: 14px; color: var(--text); margin-bottom: 12px;">
+                    由詹佰瑞、董俊彤带队，用“三步极简教学法”教老人使用相机，拍摄老镰刀、旧农具等承载记忆的物件，活动中老人自然开启忆旧交流，形成热闹氛围。
+                </p>
+                <div class="activity-stats" style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 12px; color: var(--primary); background: rgba(46,125,50,0.1); padding: 4px 8px; border-radius: 8px;">82%空巢老人重拾记忆</span>
+                    <span style="font-size: 12px; color: var(--primary); background: rgba(46,125,50,0.1); padding: 4px 8px; border-radius: 8px;">社交频次提升2倍</span>
+                </div>
+                <button class="android-btn android-btn-outline" id="activityHeilongjiangBtn">查看详情</button>
+            </div>
+
+            <!-- 山东活动 -->
+            <div class="android-card">
+                <div class="activity-header">
+                    <div class="activity-title">山东“渔光曲”创作活动</div>
+                    <div class="activity-meta">
+                        <span><i class="fa fa-calendar"></i> 七月初</span>
+                        <span><i class="fa fa-map-marker"></i> 临沂汪沟镇养老院</span>
+                    </div>
+                </div>
+                
+                <div class="activity-gallery">
+                    <div class="gallery-item" data-img="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/df20cdeabf644bc7bee5d4c39aad181e.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=q5f9JX9aEeY4W4P8YhFPiVyJHM0%3D">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/df20cdeabf644bc7bee5d4c39aad181e.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=q5f9JX9aEeY4W4P8YhFPiVyJHM0%3D" alt="山东活动现场照片1">
+                    </div>
+                </div>
+                
+                <p style="font-size: 14px; color: var(--text); margin-bottom: 12px;">
+                    李月翔带队，赵宁、杨斯宇协助，从手机相机基础操作教起，设计轻松小游戏引导参与，老人拍摄身边街巷、邻里互动场景，队员与老人合影留念。
+                </p>
+                <div class="activity-stats" style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 12px; color: var(--primary); background: rgba(46,125,50,0.1); padding: 4px 8px; border-radius: 8px;">85%老人认可价值</span>
+                    <span style="font-size: 12px; color: var(--primary); background: rgba(46,125,50,0.1); padding: 4px 8px; border-radius: 8px;">103份有效问卷</span>
+                </div>
+                <button class="android-btn android-btn-outline" id="activityShandongBtn">查看详情</button>
+            </div>
+
+            <!-- 安徽活动 - 优化整合版 -->
+            <div class="android-card">
+                <div class="activity-header">
+                    <div class="activity-title">安徽“徽韵”主题活动</div>
+                    <div class="activity-meta">
+                        <span><i class="fa fa-calendar"></i> 七月中旬</span>
+                        <span><i class="fa fa-map-marker"></i> 西林敬老院</span>
+                    </div>
+                </div>
+                
+                <div class="activity-gallery">
+                    <!-- 原有图片 -->
+                    <div class="gallery-item" data-img="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/511feabd1c2d4178aaef7bf6785d5f06.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=z4%2F9hZqIu%2BW3OltU%2FOyjhkSMTtQ%3D">
+                        <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/511feabd1c2d4178aaef7bf6785d5f06.jpg~tplv-a9rns2rl98-24:720:720.image?rk3s=1fb89129&x-expires=1756464930&x-signature=z4%2F9hZqIu%2BW3OltU%2FOyjhkSMTtQ%3D" alt="安徽活动现场照片（徽派建筑拍摄）">
+                    </div>
+                    <!-- 新增安徽活动现场照片 -->
+                    <div class="gallery-item" data-img="https://picsum.photos/id/1067/720/720">
+                        <img src="https://picsum.photos/id/1067/720/720" alt="安徽徽韵活动现场（老人围坐创作）">
+                    </div>
+                    <div class="gallery-item" data-img="https://picsum.photos/id/1060/720/720">
+                        <img src="https://picsum.photos/id/1060/720/720" alt="安徽老人展示摄影作品">
+                    </div>
+                </div>
+                
+                <p style="font-size: 14px; color: var(--text); margin-bottom: 12px;">
+                    詹佰瑞、张凌恩带队，在明亮活动室开展摄影教程课，老人们围坐学习徽派建筑构图技巧，结合黄梅戏赏析引导记录马头墙、雕花窗等元素，现场交流踊跃。
+                </p>
+                <div class="activity-stats" style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 12px; color: var(--primary); background: rgba(46,125,50,0.1); padding: 4px 8px; border-radius: 8px;">50+建筑摄影作品</span>
+                    <span style="font-size: 12px; color: var(--primary); background: rgba(46,125,50,0.1); padding: 4px 8px; border-radius: 8px;">75%情感共鸣</span>
+                </div>
+                <button class="android-btn android-btn-outline" id="activityAnhuiBtn">查看详情</button>
+            </div>
+        </div>
+
+        <!-- 联系我们页 -->
+        <div id="contactPage" class="page">
+            <div class="android-card">
+                <h2 style="font-size: 18px; margin-bottom: 16px; color: var(--text);">多元联络通道</h2>
+            </div>
+
+            <!-- 志愿者通道 -->
+            <div class="android-card contact-card">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fa fa-hand-paper-o"></i>
+                    </div>
+                    <div class="contact-info">
+                        <h3>志愿者接力</h3>
+                        <p>招募有耐心、有共情力的志愿者，参与老人陪伴、技术教学、活动协助等工作，共同助力银龄公益。</p>
+                    </div>
+                </div>
+                <button class="android-btn android-btn-secondary" id="volunteerBtn">立即报名</button>
+            </div>
+
+            <!-- 机构合作 -->
+            <div class="android-card contact-card">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fa fa-handshake-o"></i>
+                    </div>
+                    <div class="contact-info">
+                        <h3>机构合作</h3>
+                        <p>提供定制化光影课程、场地共建、资源共享、长期服务机制搭建等合作方案，携手推动养老服务升级。</p>
+                    </div>
+                </div>
+                <button class="android-btn android-btn-secondary" id="cooperateBtn">对接合作</button>
+            </div>
+
+            <!-- 反馈渠道 -->
+            <div class="android-card contact-card">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fa fa-envelope-o"></i>
+                    </div>
+                    <div class="contact-info">
+                        <h3>故事回声</h3>
+                        <p>收集老人家属及关注者的建议，记录老人参与实践后的变化故事，我们将及时回复并优化服务。</p>
+                    </div>
+                </div>
+                <button class="android-btn android-btn-secondary" id="feedbackBtn">提交反馈</button>
+            </div>
+
+            <!-- 团队信息 -->
+            <div class="android-card" style="text-align: center; margin-top: 16px;">
+                <p style="font-size: 14px; color: var(--text-light); margin-bottom: 8px;">
+                    <i class="fa fa-school"></i> 东北农业大学“银龄光影”三下乡实践队
+                </p>
+                <p style="font-size: 12px; color: var(--gray-dark);">
+                    © 2025 与温暖同行，持续生长
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片查看器 -->
+    <div class="image-viewer" id="imageViewer">
+        <div class="viewer-content">
+            <img src="" alt="大图预览" class="viewer-image" id="viewerImage">
+            <div class="viewer-close" id="viewerClose">
+                <i class="fa fa-times"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 安卓底部导航栏 - 四个按钮 -->
+    <div class="android-nav">
+        <div class="nav-item active" data-page="home">
+            <i class="fa fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="nav-item" data-page="project">
+            <i class="fa fa-sitemap"></i>
+            <span>项目</span>
+        </div>
+        <div class="nav-item" data-page="activity">
+            <i class="fa fa-calendar-check-o"></i>
+            <span>活动</span>
+        </div>
+        <div class="nav-item" data-page="contact">
+            <i class="fa fa-phone"></i>
+            <span>联系</span>
+        </div>
+    </div>
+
+    <script>
+        // 1. 页面切换核心功能
+        const navItems = document.querySelectorAll('.nav-item');
+        const pages = document.querySelectorAll('.page');
+        const pageTitle = document.getElementById('pageTitle');
+        const backBtn = document.getElementById('backBtn');
+        let historyStack = ['home']; // 页面历史栈
+
+        // 底部导航切换页面
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetPage = item.getAttribute('data-page');
+                
+                // 更新导航选中状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                
+                // 更新页面显示
+                pages.forEach(page => page.classList.remove('active'));
+                document.getElementById(`${targetPage}Page`).classList.add('active');
+                
+                // 更新标题
+                const titleMap = {
+                    home: '银龄光影实践队',
+                    project: '项目详情',
+                    activity: '活动记录',
+                    contact: '联系我们'
+                };
+                pageTitle.textContent = titleMap[targetPage];
+                
+                // 入栈（避免重复入栈）
+                if (historyStack[historyStack.length - 1] !== targetPage) {
+                    historyStack.push(targetPage);
+                }
+            });
+        });
+
+        // 返回按钮功能
+        backBtn.addEventListener('click', () => {
+            if (historyStack.length <= 1) {
+                // 栈中只有首页，不返回
+                return;
+            }
+            
+            // 出栈
+            historyStack.pop();
+            const prevPage = historyStack[historyStack.length - 1];
+            
+            // 切换到上一页
+            navItems.forEach(nav => {
+                if (nav.getAttribute('data-page') === prevPage) {
+                    nav.click();
+                }
+            });
+        });
+
+        // 2. 项目页面标签切换（团队/场景）
+        const projectTabs = document.querySelectorAll('.project-tab');
+        const projectContents = document.querySelectorAll('.project-content');
+        
+        projectTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetContent = tab.getAttribute('data-project');
+                
+                // 更新标签选中状态
+                projectTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // 更新内容显示
+                projectContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`project${targetContent.charAt(0).toUpperCase() + targetContent.slice(1)}`).classList.add('active');
+            });
+        });
+
+        // 3. 团队成员卡片展开/收起
+        const teamMembers = document.querySelectorAll('.team-member');
+        teamMembers.forEach(member => {
+            member.addEventListener('click', () => {
+                const memberId = member.getAttribute('data-member');
+                const descElem = document.getElementById(`member${memberId}Desc`);
+                descElem.classList.toggle('active');
+            });
+        });
+
+        // 4. 实践场景Tab切换
+        const scenarioTabs = document.querySelectorAll('.scenario-tab');
+        const scenarioContents = document.querySelectorAll('.scenario-content');
+        scenarioTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetScenario = tab.getAttribute('data-scenario');
+                
+                // 更新Tab选中状态
+                scenarioTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // 更新场景内容
+                scenarioContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`scenario${targetScenario.charAt(0).toUpperCase() + targetScenario.slice(1)}`).classList.add('active');
+            });
+        });
+
+        // 5. 首页按钮跳转
+        document.getElementById('homeStartBtn').addEventListener('click', () => {
+            navItems.forEach(nav => {
+                if (nav.getAttribute('data-page') === 'activity') {
+                    nav.click();
+                }
+            });
+        });
+
+        document.getElementById('homeProjectBtn').addEventListener('click', () => {
+            navItems.forEach(nav => {
+                if (nav.getAttribute('data-page') === 'project') {
+                    nav.click();
+                }
+            });
+        });
+
+        // 6. 场景页面活动按钮跳转
+        document.getElementById('heilongjiangActivityBtn').addEventListener('click', () => {
+            navItems.forEach(nav => {
+                if (nav.getAttribute('data-page') === 'activity') {
+                    nav.click();
+                }
+            });
+            // 滚动到黑龙江活动
+            document.querySelector('.activity-title').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('shandongActivityBtn').addEventListener('click', () => {
+            navItems.forEach(nav => {
+                if (nav.getAttribute('data-page') === 'activity') {
+                    nav.click();
+                }
+            });
+            // 滚动到山东活动
+            document.querySelectorAll('.activity-title')[1].scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('anhuiActivityBtn').addEventListener('click', () => {
+            navItems.forEach(nav => {
+                if (nav.getAttribute('data-page') === 'activity') {
+                    nav.click();
+                }
+            });
+            // 滚动到安徽活动
+            document.querySelectorAll('.activity-title')[2].scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // 7. 活动记录页详情按钮
+        document.getElementById('activityHeilongjiangBtn').addEventListener('click', () => {
+            alert('黑龙江"北大荒记忆影像营"活动详情：\n\n活动为期3天，采用"理论+实践+分享"模式，第一天讲解摄影基础，第二天指导老人拍摄老物件，第三天举办小型影展。\n\n成果：82%的空巢老人通过讲述照片背后故事，重新建立了与他人的情感连接，社交频次提升2倍。');
+        });
+
+        document.getElementById('activityShandongBtn').addEventListener('click', () => {
+            alert('山东"渔光曲"创作活动详情：\n\n活动设计了"三步教学法"：握机姿势→构图技巧→一键分享，结合当地吕剧元素，让老人在熟悉的文化氛围中学习。\n\n成果：回收103份有效问卷，85%老人认为该活动"有意义"，72%表示会继续用手机记录生活。');
+        });
+
+        document.getElementById('activityAnhuiBtn').addEventListener('click', () => {
+            alert('安徽"徽韵"主题活动详情：\n\n活动为期2天，第一天进行徽派建筑摄影教学与黄梅戏欣赏，第二天组织老人户外拍摄并分享作品背后的故事。\n\n特色环节：邀请当地建筑师讲解马头墙、雕花窗的文化内涵，帮助老人深化对本土文化的理解。\n\n成果：完成50余幅高质量建筑摄影作品，90%老人表示增强了文化认同感，75%产生强烈情感共鸣。');
+        });
+
+        // 8. 联系我们按钮
+        document.getElementById('volunteerBtn').addEventListener('click', () => {
+            alert('志愿者报名通道已开启！\n\n请发送个人简历至：yinlingguangying@163.com\n\n邮件主题注明"志愿者报名+姓名"，我们将在3个工作日内回复。');
+        });
+
+        document.getElementById('cooperateBtn').addEventListener('click', () => {
+            alert('机构合作咨询：\n\n联系人：詹老师\n电话：138-xxxx-xxxx\n邮箱：coop@yinlingguangying.org\n\n我们提供定制化合作方案，期待与您携手！');
+        });
+
+        document.getElementById('feedbackBtn').addEventListener('click', () => {
+            alert('反馈提交：\n\n您可以通过以下方式分享您的故事和建议：\n1. 微信公众号：银龄光影\n2. 邮箱：feedback@yinlingguangying.org\n3. 电话：400-xxx-xxxx\n\n我们珍视每一份反馈！');
+        });
+
+        // 9. 更多成员按钮
+        document.getElementById('moreMemberBtn').addEventListener('click', () => {
+            alert('团队其他核心成员包括：\n- 张凌恩：安徽区域负责人，主导徽派建筑摄影教学\n- 赵宁：摄影技术指导，负责相机操作培训\n- 杨斯宇：数据分析员，整理实践数据与效果评估\n- 王梦琪：活动记录与宣传，负责影像资料整理\n\n全队共15名成员，来自东北农业大学多个专业，形成跨学科服务团队。');
+        });
+
+        // 10. 图片查看器功能
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        const imageViewer = document.getElementById('imageViewer');
+        const viewerImage = document.getElementById('viewerImage');
+        const viewerClose = document.getElementById('viewerClose');
+
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const imgSrc = item.getAttribute('data-img');
+                viewerImage.src = imgSrc;
+                viewerImage.alt = item.querySelector('img').alt;
+                imageViewer.classList.add('active');
+                // 防止背景滚动
+                document.body.style.overflow = 'hidden';
+            });
+        });
+
+        viewerClose.addEventListener('click', () => {
+            imageViewer.classList.remove('active');
+            // 恢复背景滚动
+            document.body.style.overflow = '';
+        });
+
+        // 点击图片外部也可关闭
+        imageViewer.addEventListener('click', (e) => {
+            if (e.target === imageViewer) {
+                imageViewer.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+
+        // 11. 添加页面切换动画增强
+        function pageTransition(fromPage, toPage) {
+            fromPage.style.opacity = '0';
+            fromPage.style.transform = 'translateX(-20px)';
+            
+            setTimeout(() => {
+                fromPage.classList.remove('active');
+                toPage.classList.add('active');
+                
+                setTimeout(() => {
+                    toPage.style.opacity = '1';
+                    toPage.style.transform = 'translateX(0)';
+                }, 50);
+            }, 300);
+        }
+    </script>
+</body>
+</html>
+    
